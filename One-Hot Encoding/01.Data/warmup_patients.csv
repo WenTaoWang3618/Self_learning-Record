@@ -1,0 +1,11 @@
+patient_id,age,sex,chest_pain_type,blood_pressure,cholesterol,smoker,diagnosis
+P001,58,M,typical_angina,140,228,yes,disease
+P002,43,F,atypical_angina,120,217,no,no_disease
+P003,67,M,non_anginal,150,260,yes,disease
+P004,51,F,typical_angina,130,204,no,no_disease
+P005,62,M,asymptomatic,160,286,yes,disease
+P006,45,F,non_anginal,118,190,no,no_disease
+P007,71,M,asymptomatic,152,241,yes,disease
+P008,39,F,atypical_angina,124,198,no,no_disease
+P009,55,M,typical_angina,144,233,yes,disease
+P010,60,F,non_anginal,136,254,no,no_disease
