@@ -2,8 +2,36 @@
 
 > 本 README 整理自一次完整的"从概念到实验"学习路径：RNN/LSTM 的架构原理 → 在 CB513 蛋白二级结构预测上的两个完整对照实验（序列谱特征 vs ESM2 预训练 embedding）。所有代码可直接运行，实验结果可复现。
 
+## 0. 模型选择：LSTM 适合哪些生物学任务
+
+**判断标准一句话：数据有"顺序依赖"，就有 LSTM 的用武之地。** 生物学里的序列和时间过程无处不在，按任务模式分四类：
+
+### 四类适用任务
+
+| 任务模式 | 生物学任务举例 |
+|---|---|
+| **逐位置标注**（多对多） | 蛋白二级结构预测 [1]；磷酸化/糖基化等修饰位点；剪接位点、启动子/增强子定位；信号肽与跨膜区；抗原表位 |
+| **整条序列分类/回归**（多对一） | 蛋白溶解度/稳定性/表达量；酶-非酶与蛋白家族分类；突变致病性预测 |
+| **真正的时间过程**（时间步 = 采样时刻） | 构象动力学与 MD 轨迹建模 [2, 3]；ECG/EEG/ICU 生理信号；纵向临床数据与疾病进展；时序组学与细胞分化轨迹；药代动力学曲线 |
+| **序列生成**（自回归） | SMILES 药物分子生成；蛋白/抗体序列设计；启动子/元件设计 |
+
+### 什么时候不用 LSTM
+
+| 情形 | 更合适的工具 |
+|---|---|
+| 超长序列（基因组级上下文） | Transformer / 长上下文架构 |
+| 位置**对**之间的交互（共进化、接触图） | 2D CNN / Attention |
+| 图结构数据（PPI 网络、代谢通路） | 图神经网络（GNN） |
+| 静态图像（病理切片、显微图像） | CNN / ViT |
+| 极小数据集 + 需要可解释概率 | HMM / 贝叶斯方法 |
+
+### 实践建议
+
+中小规模序列任务（几百到几万条样本、序列长几十到几百位），LSTM/GRU 是便宜且强的基线。动手前先问一句：**打乱序列顺序后，标签还成立吗？** 若成立（任务只依赖组成信息、不依赖顺序），RNN 的结构优势用不上，普通网络就够了。
+
 ## 目录
 
+0. [模型选择：LSTM 适合哪些生物学任务](#0-模型选择lstm-适合哪些生物学任务)
 1. [RNN 基础](#1-rnn-基础)
 2. [LSTM 原理](#2-lstm-原理)
 3. [实战：蛋白二级结构预测](#3-实战蛋白二级结构预测q3-三态分类)
@@ -277,17 +305,17 @@ python train_ss_bilstm_esm.py --esm-model esm2_t33_650M_UR50D   # 更强但更�
 ## 7. 延伸阅读
 
 - [1] Heffernan et al., Bioinformatics 2017 —— BiLSTM 二级结构预测（本实验的文献基线，Q3 ≈ 84%）
-- [2] Zhou & Troyanskaya, ICML 2014 数据集（Zenodo 镜像）—— CB513 数据与格式文档
-- [3] López-Correa et al., Scientific Reports 2023 —— LSTM 直接预测 GPCR 分子动力学轨迹（构象时间序列建模）
-- [4] Mardt et al., Nature Communications 2017 —— VAMPnets：深度学习从 MD 轨迹学动力学模型
-- [5] Shen et al., NeurIPS 2025 —— 自回归模型同时建模蛋白构象与动力学
+- [4] Zhou & Troyanskaya, ICML 2014 数据集（Zenodo 镜像）—— CB513 数据与格式文档
+- [2] López-Correa et al., Scientific Reports 2023 —— LSTM 直接预测 GPCR 分子动力学轨迹（构象时间序列建模）
+- [5] Mardt et al., Nature Communications 2017 —— VAMPnets：深度学习从 MD 轨迹学动力学模型
+- [3] Shen et al., NeurIPS 2025 —— 自回归模型同时建模蛋白构象与动力学
 - [6] Lewis et al., Science 2025 —— BioEmu：生成式蛋白构象系综仿真
 
 ## References
 
 1. Rhys Heffernan, Yuedong Yang, K. Paliwal, et al. Capturing non-local interactions by long short-term memory bidirectional recurrent neural networks for improving prediction of protein secondary structure, backbone angles, contact numbers and solvent accessibility. Bioinformatics. 2017. doi:10.1093/bioinformatics/btx218.
-2. Deep Supervised and Convolutional Generative Stochastic Network for Protein Secondary Structure Prediction, 2014 | Zenodo. [cited 2026 Nov 10]. Available from: https://zenodo.org/records/7764556
-3. Juan Manuel López-Correa, Caroline König, Alfredo Vellido. GPCR molecular dynamics forecasting using recurrent neural networks. Scientific Reports. 2023. doi:10.1038/s41598-023-48346-4.
-4. Andreas Mardt, Luca Pasquali, Hao Wu, et al. VAMPnets for deep learning of molecular kinetics. Nature Communications. 2017. doi:10.1038/s41467-017-02388-1.
-5. Shen Y, Wang L, Yuan H, Wang Y, Yang B, Gu Q. Simultaneous Modeling of Protein Conformation and Dynamics via Autoregression. Advances in Neural Information Processing Systems 38. 2025. doi:10.52202/085713-3666.
+2. Juan Manuel López-Correa, Caroline König, Alfredo Vellido. GPCR molecular dynamics forecasting using recurrent neural networks. Scientific Reports. 2023. doi:10.1038/s41598-023-48346-4.
+3. Shen Y, Wang L, Yuan H, Wang Y, Yang B, Gu Q. Simultaneous Modeling of Protein Conformation and Dynamics via Autoregression. Advances in Neural Information Processing Systems 38. 2025. doi:10.52202/085713-3666.
+4. Deep Supervised and Convolutional Generative Stochastic Network for Protein Secondary Structure Prediction, 2014 | Zenodo. [cited 2026 Nov 10]. Available from: https://zenodo.org/records/7764556
+5. Andreas Mardt, Luca Pasquali, Hao Wu, et al. VAMPnets for deep learning of molecular kinetics. Nature Communications. 2017. doi:10.1038/s41467-017-02388-1.
 6. Lewis S, Hempel T, Jiménez-Luna J, Gastegger M, Xie Y, Foong AYK, et al. Scalable emulation of protein equilibrium ensembles with generative deep learning. Science. 2025. doi:10.1126/science.adv9817.
